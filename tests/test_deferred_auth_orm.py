@@ -10,6 +10,7 @@ from jsonapi_requests.orm import AttributeField, RelationField
 from jsonapi_requests.orm.deferred_auth_api_model import DeferredAuthApiModel
 from jsonapi_requests.orm.flask.api_model import FlaskAuthApiModel
 
+
 @pytest.fixture
 def flask_app():
     app = Flask(__name__)
@@ -19,20 +20,20 @@ def flask_app():
 @pytest.fixture
 def valid_response():
     response = mock.Mock(status_code=200)
-    response.json.return_value = {"data": data.JsonApiObject(
-            type='person', id='123', attributes={'first-name': 'alice'}).as_data()}
+    response.json.return_value = {
+        "data": data.JsonApiObject(type="person", id="123", attributes={"first-name": "alice"}).as_data()
+    }
     return response
 
 
 @pytest.fixture
 def request_send_mock(valid_response):
-    with mock.patch('requests.sessions.Session.send') as mocked:
+    with mock.patch("requests.sessions.Session.send") as mocked:
         mocked.return_value = valid_response
         yield mocked
 
 
 class FlaskClientToRailsServer(FlaskAuthApiModel):
-
     @classmethod
     def timeout(cls) -> Optional[int]:
         return None
@@ -47,7 +48,6 @@ class FlaskClientToRailsServer(FlaskAuthApiModel):
 
 
 class TestDeferredAuthApiModel:
-
     def test_class_definition_without_api_meta_attribute(self):
         class Person(DeferredAuthApiModel):
             class Meta:
@@ -69,7 +69,6 @@ class TestDeferredAuthApiModel:
 
 
 class TestFlaskAuthApiModel:
-
     def test_class_definition_without_api_meta_attribute(self):
         class Person(FlaskAuthApiModel):
             class Meta:
@@ -88,8 +87,9 @@ class TestFlaskAuthApiModel:
 
         with flask_app.app_context():
             with flask_app.test_request_context(
-                        headers={'Authorization': 'Bearer 11111111-1111-1111-1111-111111111111'}):
+                headers={"Authorization": "Bearer 11111111-1111-1111-1111-111111111111"}
+            ):
                 _ = Person.from_id("123").first_name
                 args, kwargs = request_send_mock.call_args
                 headers = args[0].headers
-                assert 'Bearer 11111111-1111-1111-1111-111111111111' in headers['Authorization']
+                assert "Bearer 11111111-1111-1111-1111-111111111111" in headers["Authorization"]

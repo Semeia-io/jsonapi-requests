@@ -29,7 +29,6 @@ class DeferredAuthOptionsFactory(OptionsFactory):
 
 
 class DeferredAuthOptionsFactoryMetaclass(type):
-
     def __init__(cls, name, bases, attrs):
         super().__init__(name, bases, attrs)
 
@@ -60,11 +59,13 @@ class DeferredAuthAPIModelMetaclass(ApiModelMetaclass, type):
         """
         instance = DeferredAuthApiModel.__new__(self)
         DeferredAuthApiModel.__init__(instance, *args, **kwargs)
-        if not hasattr(instance, 'api'):
-            raise NotImplementedError(f"Instance of class {instance.__class__.__name__} is derived from"
-                                      f" metaclass {self.__class__.__name__}. "
-                                      f"Therefore it is required to implement interface classmethod"
-                                      f" `{instance.__class__.__name__}.api`.")
+        if not hasattr(instance, "api"):
+            raise NotImplementedError(
+                f"Instance of class {instance.__class__.__name__} is derived from"
+                f" metaclass {self.__class__.__name__}. "
+                "Therefore it is required to implement interface classmethod"
+                f" `{instance.__class__.__name__}.api`."
+            )
         _options_factory = DeferredAuthOptionsFactory(self, self.classdict)
         _options_factory.api_builder = instance.api
         self._options = _options_factory.get()
@@ -78,5 +79,6 @@ class DeferredAuthApiModel(ApiModel, metaclass=DeferredAuthAPIModelMetaclass):
 
     @classmethod
     def api(cls) -> OrmApi:
-        raise NotImplementedError("Any class derived from metaclass DeferredAuthAPIModelMetaclass "
-                                  "should implement api classmethod.")
+        raise NotImplementedError(
+            "Any class derived from metaclass DeferredAuthAPIModelMetaclass should implement api classmethod."
+        )
